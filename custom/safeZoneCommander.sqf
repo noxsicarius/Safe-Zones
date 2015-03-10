@@ -6,6 +6,7 @@ Private ["_EH_Fired", "_ehID", "_fix","_inVehicle","_inVehicleLast","_EH_Fired_V
 		"_inVehicleDamage","_antiBackpackThread","_antiBackpackThread2"];
 		
 //SCRIPT SETTINGS
+NOX_zombieShield = true;									//Remove zombies from safe zone
 AGN_safeZoneDebug = false; 									//Debug notes on screen.
 AGN_safeZoneGodmode = true; 								//Should safezone Godmode be enabled?
 AGN_safeZoneMessages = true;								//Should players get messages when entering and exiting the safe zone?
@@ -51,6 +52,27 @@ while {true} do {
 			NearestObject [_this select 0,_this select 4] setPos[0,0,0];
 		}];
 	};
+	
+	if (NOX_zombieShield) then 
+	{
+		_antiZombieThread = [] spawn {
+			private ["_pos","_zombies","_player"];
+			_player = player;
+			while {!canBuild} do
+			{
+				_pos = getPos _player;
+				_zombies = _pos nearEntities ["zZombie_Base",40];
+
+				{
+					if (_x isKindof "zZombie_Base") then {
+						deletevehicle _x;
+					};
+				} forEach _zombies;
+				Sleep 8;
+			};
+		};
+	};
+
 	
 	if ( AGN_safeZone_Backpack_EnableAntiBackpack ) then
 	{
@@ -191,6 +213,7 @@ while {true} do {
 	AGN_LastPlayerLookedAtCountDown = 5;
 	terminate _antiBackpackThread;
 	terminate _antiBackpackThread2;
+	terminate _antiZombieThread;
 	if ( AGN_safeZoneMessages ) then { systemChat ("[AGN] Exiting Trader Area - God Mode protection will be removed in 5-10 seconds to prevent safezone campers."); };
 	
 	if ( AGN_safeZone_Vehicles_DisableMountedGuns ) then
@@ -224,5 +247,6 @@ while {true} do {
 		_thePlayer removeAllEventHandlers "handleDamage";
 		_thePlayer allowDamage true;
 	};
+		
 	_inSafezoneFinished = true;
 };
