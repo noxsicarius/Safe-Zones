@@ -69,11 +69,13 @@ while {true} do {
 					hideObject _x;
 				} forEach _zombies;
 				
-				Sleep 5;
+				Sleep 2;
 				
 				{
 					deletevehicle _x;
 				} forEach _zombies;
+				
+				Sleep 3;
 			};
 		};
 	};
