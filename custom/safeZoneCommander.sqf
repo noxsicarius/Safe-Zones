@@ -65,18 +65,14 @@ while {true} do {
 				_zombies = _pos nearEntities ["zZombie_Base",40];
 
 				{
-					if (_x isKindof "zZombie_Base") then {
-						_x setDamage 1;
-						hideObject _x;
-					};
+					_x setDamage 1;
+					hideObject _x;
 				} forEach _zombies;
 				
 				Sleep 5;
 				
 				{
-					if (_x isKindof "zZombie_Base") then {
-						deletevehicle _x;
-					};
+					deletevehicle _x;
 				} forEach _zombies;
 			};
 		};
