@@ -3,9 +3,10 @@
  */
 
 Private ["_EH_Fired", "_ehID", "_fix","_inVehicle","_inVehicleLast","_EH_Fired_Vehicle",
-		"_inVehicleDamage","_antiBackpackThread","_antiBackpackThread2"];
-		
+		"_inVehicleDamage","_antiBackpackThread","_antiBackpackThread2","_antiZombieThread"];
+
 //SCRIPT SETTINGS
+antiCamper = 10;											//Time limit for keeping god mode active x seconds after leaving the zone
 NOX_zombieShield = true;									//Remove zombies from safe zone
 AGN_safeZoneDebug = false; 									//Debug notes on screen.
 AGN_safeZoneGodmode = true; 								//Should safezone Godmode be enabled?
@@ -65,10 +66,18 @@ while {true} do {
 
 				{
 					if (_x isKindof "zZombie_Base") then {
+						_x setDamage 1;
+						hideObject _x;
+					};
+				} forEach _zombies;
+				
+				Sleep 5;
+				
+				{
+					if (_x isKindof "zZombie_Base") then {
 						deletevehicle _x;
 					};
 				} forEach _zombies;
-				Sleep 8;
 			};
 		};
 	};
@@ -238,7 +247,7 @@ while {true} do {
 	
 	if ( AGN_safeZoneGodmode ) then
 	{
-		sleep 10;
+		sleep antiCamper;
 		systemChat ( "[AGN] Protection disabled, be careful!" );
 		{_x allowdamage true } foreach (nearestObjects [player,['LandVehicle','Air'], 75]);
 		player_zombieCheck = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\player_zombieCheck.sqf";
