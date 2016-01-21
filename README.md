@@ -16,7 +16,7 @@ Safe-Zones
 	And past the following code ***at the bottom*** of it:
 	
 	~~~~java
-	[] ExecVM "custom\safeZones.sqf";
+	[] ExecVM "custom\safeZones.sqf"; // Nox safe zones
 	~~~~
 
 1. Save the file
