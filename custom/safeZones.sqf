@@ -37,7 +37,7 @@ if (isNil "inZone") then {inZone = false;};
 if (isNil "canbuild") then {canbuild = true;};
 if (isNil "playerGod2") then {playerGod2 = false;};
 if (isNil "vehicleGod2") then {vehicleGod2 = false;};
-if (isNil "gmdadmin") then {gmdadmin = false;};
+if (isNil "gmadmin") then {gmadmin = false;};
 if (isNil "adminCarGod") then {adminCarGod = false;};
 
 _enterMsg = "*** PROTECTED ZONE! No stealing or shooting allowed ***";
@@ -57,7 +57,7 @@ _fnc_enterZonePlayer = {
 	
 	_EH_weaponFirePlayer = _player addEventHandler ["Fired", {deleteVehicle (nearestObject [_this select 0,_this select 4]);cutText ["***ALL weapons disabled inside Safe Zones***","WHITE IN",2];}];
 	
-	if (!playerGod2 && !gmdadmin) then {
+	if (!playerGod2 && !gmadmin) then {
 		player_zombieCheck = {};
 		fnc_usec_damageHandler = {};
 		_player removeAllEventHandlers "handleDamage";
@@ -109,7 +109,7 @@ _fnc_exitZone = {
 	
 	_player removeEventHandler ["Fired", _EH_weaponFirePlayer];
 	
-	if (!playerGod2 && !gmdadmin) then {
+	if (!playerGod2 && !gmadmin) then {
 		_player allowDamage true;
 		player_zombieCheck = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\player_zombieCheck.sqf";
 		fnc_usec_damageHandler = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\fn_damageHandler.sqf";
