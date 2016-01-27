@@ -38,7 +38,7 @@ if (isNil "canbuild") then {canbuild = true;};
 if (isNil "playerGod2") then {playerGod2 = false;};
 if (isNil "vehicleGod2") then {vehicleGod2 = false;};
 if (isNil "gmadmin") then {gmadmin = false;};
-if (isNil "adminCarGod") then {adminCarGod = false;};
+if (isNil "adminCarGodToggle") then {adminCarGodToggle = false;};
 
 _enterMsg = "*** PROTECTED ZONE! No stealing or shooting allowed ***";
 _exitMsg = "*** GOD MODE DISABLED! You can now be damaged ***";
@@ -71,7 +71,7 @@ _fnc_enterZonePlayer = {
 _fnc_enterZoneVehicle = {
 	private["_veh","_inZone"];
 	_veh = vehicle player;
-	if (player != _veh && !vehicleGod2 && !adminCarGod) then {
+	if (player != _veh && !vehicleGod2 && !adminCarGodToggle) then {
 		_inZone = _veh getVariable ["inZone",0];
 		if (_inZone == 0) then {
 			_EH_weaponFireVehicle = _veh addEventHandler ["Fired", {deleteVehicle (nearestObject [_this select 0,_this select 4]);cutText ["***ALL weapons disabled inside Safe Zones***","WHITE IN",2];}];
@@ -96,7 +96,7 @@ _fnc_exitZone = {
 	_player = player;
 	_veh = vehicle _player;
 	_veh removeEventHandler ["Fired",_EH_weaponFireVehicle];
-	if (player != _veh && !vehicleGod2 && EAT_szVehicleGod && !adminCarGod) then {
+	if (player != _veh && !vehicleGod2 && EAT_szVehicleGod && !adminCarGodToggle) then {
 		vehicle_handleDamage = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\vehicle_handleDamage.sqf";
 		_inZone = _veh getVariable ["inZone",0];
 		if (_inZone == 1) then {
