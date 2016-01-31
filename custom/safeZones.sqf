@@ -3,9 +3,11 @@
 
 
 /*************************** CONFIG ***************************/
-	useEAT = false; // Are you using Epoch Admin Tools?
-	useInfistar = false; // Are you using Infistar admin tool?
-
+	/* IMPORTANT */
+	// You no longer need to choose your admin tools!
+	// This script will now auto-detect and use the tool settings
+	// Only for EAT and infistar
+	
 	EAT_szVehicleGod = true; // Protect vehicles in the safe zone
 	EAT_szDetectTraders = true; // This can USUALLY detect the MAJOR THREE traders (no aircraft/bandit/hero)
 	EAT_szUseCustomZones = false; // Allows you to set your own zone positions (Works with auto detect)
@@ -30,13 +32,18 @@
 /*************************** CONFIG ***************************/
 
 	
-private ["_fnc_enterZoneVehicle","_fnc_clearZombies","_fnc_enterZonePlayer","_EH_weaponFirePlayer","_EH_weaponFireVehicle","_fnc_exitZone","_enterMsg","_exitMsg"];
+private ["_fnc_enterZoneVehicle","_fnc_clearZombies","_fnc_enterZonePlayer","_fnc_exitZone","_EH_weaponFirePlayer","_EH_weaponFireVehicle","_enterMsg","_exitMsg"];
 if (isNil "inZone") then {inZone = false;};
 if (isNil "canbuild") then {canbuild = true;};
 if (isNil "playerGod2") then {playerGod2 = false;};
+if (isNil "vehicleGod2") then {vehicleGod2 = false;};
+if (isNil "gmadmin") then {gmadmin = false;};
+if (isNil "adminCarGodToggle") then {adminCarGodToggle = false;};
+
 _enterMsg = "*** PROTECTED ZONE! No stealing or shooting allowed ***";
 _exitMsg = "*** GOD MODE DISABLED! You can now be damaged ***";
-
+_EH_weaponFireVehicle = 1;
+_EH_weaponFirePlayer = 1;
 
 
 // handles players entering zone
@@ -50,8 +57,7 @@ _fnc_enterZonePlayer = {
 	
 	_EH_weaponFirePlayer = _player addEventHandler ["Fired", {deleteVehicle (nearestObject [_this select 0,_this select 4]);cutText ["***ALL weapons disabled inside Safe Zones***","WHITE IN",2];}];
 	
-	if (useInfistar) then {playerGod2 = gmadmin};
-	if (!playerGod2) then {
+	if (!playerGod2 && !gmadmin) then {
 		player_zombieCheck = {};
 		fnc_usec_damageHandler = {};
 		_player removeAllEventHandlers "handleDamage";
@@ -65,7 +71,7 @@ _fnc_enterZonePlayer = {
 _fnc_enterZoneVehicle = {
 	private["_veh","_inZone"];
 	_veh = vehicle player;
-	if (player != _veh && !vehicleGod2) then {
+	if (player != _veh && !vehicleGod2 && !adminCarGodToggle) then {
 		_inZone = _veh getVariable ["inZone",0];
 		if (_inZone == 0) then {
 			_EH_weaponFireVehicle = _veh addEventHandler ["Fired", {deleteVehicle (nearestObject [_this select 0,_this select 4]);cutText ["***ALL weapons disabled inside Safe Zones***","WHITE IN",2];}];
@@ -89,7 +95,8 @@ _fnc_exitZone = {
 	
 	_player = player;
 	_veh = vehicle _player;
-	if (player != _veh && !vehicleGod2 && EAT_szVehicleGod) then {
+	_veh removeEventHandler ["Fired",_EH_weaponFireVehicle];
+	if (player != _veh && !vehicleGod2 && EAT_szVehicleGod && !adminCarGodToggle) then {
 		vehicle_handleDamage = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\vehicle_handleDamage.sqf";
 		_inZone = _veh getVariable ["inZone",0];
 		if (_inZone == 1) then {
@@ -97,19 +104,17 @@ _fnc_exitZone = {
 			_veh removeAllEventHandlers "handleDamage";
 			_veh addEventHandler ["handleDamage",{_this call vehicle_handleDamage}];
 			_veh allowDamage true;
-			_veh removeEventHandler ["Fired",_EH_weaponFireVehicle];
 		};
 	};
 	
-	if (useInfistar) then {playerGod2 = gmadmin};
-
-	if (!playerGod2) then {
+	_player removeEventHandler ["Fired", _EH_weaponFirePlayer];
+	
+	if (!playerGod2 && !gmadmin) then {
 		_player allowDamage true;
 		player_zombieCheck = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\player_zombieCheck.sqf";
 		fnc_usec_damageHandler = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\fn_damageHandler.sqf";
 		_player removeAllEventHandlers "handleDamage";
 		_player addEventHandler ["handleDamage",{_this call fnc_usec_damageHandler}];
-		_player removeEventHandler ["Fired", _EH_weaponFirePlayer];
 	};
 	inZone = false;
 };
