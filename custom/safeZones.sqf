@@ -45,7 +45,6 @@ _exitMsg = "*** GOD MODE DISABLED! You can now be damaged ***";
 _EH_weaponFireVehicle = 1;
 _EH_weaponFirePlayer = 1;
 
-
 // handles players entering zone
 _fnc_enterZonePlayer = {
 	private["_player","_veh","_inZone"];
@@ -69,14 +68,15 @@ _fnc_enterZonePlayer = {
 // handles occupied vehicles in zone. This includes purchased ones.
 // A player must enter the vehicle to enable god mode if it is purchased inside the zone.
 _fnc_enterZoneVehicle = {
-	private["_veh","_inZone"];
-	_veh = vehicle player;
-	if (player != _veh) then {
-		_inZone = _veh getVariable ["inZone",0];
-		if (_inZone == 0) then {
+	private["_veh","_inZone","_player"];
+	_player = player;
+	_veh = vehicle _player;
+	if (_player != _veh) then {
+		_inZone = _veh getVariable ["inZone",false];
+		if (!_inZone) then {
 			_EH_weaponFireVehicle = _veh addEventHandler ["Fired", {deleteVehicle (nearestObject [_this select 0,_this select 4]);cutText ["***ALL weapons disabled inside Safe Zones***","WHITE IN",2];}];
-			_veh setVariable ["inZone",1];
-				
+			_veh setVariable ["inZone",true,true];
+			
 			if(EAT_szVehicleGod) then {
 				vehicle_handleDamage = {};
 				_veh removeAllEventHandlers "handleDamage";
@@ -95,15 +95,15 @@ _fnc_exitZone = {
 	
 	_player = player;
 	_veh = vehicle _player;
-	_veh removeEventHandler ["Fired",_EH_weaponFireVehicle];
 	
 	if (!isNil "adminCarGodToggle") then {if(adminCarGodToggle == 1)then{EAT_szSkipVeh = true;}else{EAT_szSkipVeh = false;};};
 
-	if (player != _veh && !vehicleGod2 && EAT_szVehicleGod && !EAT_szSkipVeh) then {
-		vehicle_handleDamage = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\vehicle_handleDamage.sqf";
-		_inZone = _veh getVariable ["inZone",0];
-		if (_inZone == 1) then {
-			_veh setVariable ["inZone",0];
+	if (_player != _veh && EAT_szVehicleGod) then {
+		_veh removeEventHandler ["Fired",_EH_weaponFireVehicle];
+		
+		if (!vehicleGod2 && !EAT_szSkipVeh) then {
+			vehicle_handleDamage = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\vehicle_handleDamage.sqf";
+			_veh setVariable ["inZone",false, true];
 			_veh removeAllEventHandlers "handleDamage";
 			_veh addEventHandler ["handleDamage",{_this call vehicle_handleDamage}];
 			_veh allowDamage true;
@@ -114,11 +114,11 @@ _fnc_exitZone = {
 	
 	if (!isNil "gmadmin") then {if(gmadmin == 1)then{EAT_szSkipAdmin = true;}else{EAT_szSkipAdmin = false;};};
 	if (!playerGod2 && !EAT_szSkipAdmin) then {
-		_player allowDamage true;
 		player_zombieCheck = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\player_zombieCheck.sqf";
 		fnc_usec_damageHandler = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\fn_damageHandler.sqf";
 		_player removeAllEventHandlers "handleDamage";
 		_player addEventHandler ["handleDamage",{_this call fnc_usec_damageHandler}];
+		_player allowDamage true;
 	};
 	inZone = false;
 };
