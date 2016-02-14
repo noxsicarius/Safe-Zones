@@ -21,7 +21,7 @@
 	EAT_szUseHint = false; // Use hints for messages? (will display at bottom of screen instead if false)
 	
 	// You can find these in the sensors section of the mission.sqm for each map
-	// Format: [[POSITION],RADIUS]
+	// Format: [[X,Z,Y],RADIUS] Z can be left 0 in most cases
 	EAT_szCustomZones = [
 		// Cherno zones that can't be auto detected:
 		[[1606.6443,289.70795,7803.5156],100], // Bandit
