@@ -55,7 +55,7 @@ _fnc_enterZonePlayer = {
 	if(EAT_szUseHint) then {hint _enterMsg;} else { cutText[_enterMsg,"PLAIN DOWN"];};
 	
 	_EH_weaponFirePlayer = _player addEventHandler ["Fired", {deleteVehicle (nearestObject [_this select 0,_this select 4]);cutText ["***ALL weapons disabled inside Safe Zones***","WHITE IN",2];}];
-	
+	player_fired = {deleteVehicle (nearestObject [_this select 0,_this select 4]);cutText ["***ALL weapons disabled inside Safe Zones***","WHITE IN",2];};
 	if (!playerGod2) then {
 		player_zombieCheck = {};
 		fnc_usec_damageHandler = {};
@@ -74,7 +74,13 @@ _fnc_enterZoneVehicle = {
 	if (_player != _veh) then {
 		_inZone = _veh getVariable ["inZone",false];
 		if (!_inZone) then {
-			_EH_weaponFireVehicle = _veh addEventHandler ["Fired", {deleteVehicle (nearestObject [_this select 0,_this select 4]);cutText ["***ALL weapons disabled inside Safe Zones***","WHITE IN",2];}];
+			_veh removeAllEventHandlers 'Fired';
+            _veh addEventHandler ['Fired', {_this call player_fired;}];
+            {
+				_x removeAllEventHandlers 'Fired';
+                _x addEventHandler ['Fired', {_this call player_fired;}];
+            } forEach (crew _veh);
+			
 			_veh setVariable ["inZone",true,true];
 			
 			if(EAT_szVehicleGod) then {
@@ -97,9 +103,9 @@ _fnc_exitZone = {
 	_veh = vehicle _player;
 	
 	if (!isNil "adminCarGodToggle") then {if(adminCarGodToggle == 1)then{EAT_szSkipVeh = true;}else{EAT_szSkipVeh = false;};};
+	player_fired = compile preprocessFileLineNumbers '\z\addons\dayz_code\compile\player_fired.sqf';
 
 	if (_player != _veh && EAT_szVehicleGod) then {
-		_veh removeEventHandler ["Fired",_EH_weaponFireVehicle];
 		
 		if (!vehicleGod2 && !EAT_szSkipVeh) then {
 			vehicle_handleDamage = compile preprocessFileLineNumbers "\z\addons\dayz_code\compile\vehicle_handleDamage.sqf";
